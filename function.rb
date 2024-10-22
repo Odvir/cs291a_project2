@@ -8,6 +8,7 @@ def main(event:, context:)
   # You shouldn't need to use context, but its fields are explained here:
   # https://docs.aws.amazon.com/lambda/latest/dg/ruby-context.html
   event["headers"] = event["headers"].transform_keys(&:downcase)
+  
   if event['path'] == '/'
     if event['httpMethod'] == 'GET'
       token = event["headers"]["authorization"]
@@ -25,7 +26,6 @@ def main(event:, context:)
     else
       return response(status: 405)
     end
-  end
   else
     return response(status: 404)
   end
