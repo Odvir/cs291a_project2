@@ -25,7 +25,9 @@ def main(event:, context:)
     else
       return response(status: 405)
     end
+  end
 end
+
 
 def response(body: nil, status: 200)
   {
