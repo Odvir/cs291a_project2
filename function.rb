@@ -29,6 +29,9 @@ def main(event:, context:)
   elsif event['path'] == '/token'
     if event['httpMethod'] == 'POST'
       if event["headers"]["content-type"] == "application/json"
+        if event['body'].nil? || event['body'].strip.empty?
+          return response(status: 422, body: { error: 'Empty or missing body' }) # Return 422 if body is empty or nil
+        end
         begin
           # Handle empty body and ensure it's a valid JSON object
           parsed_body = event['body'] && !event['body'].empty? ? JSON.parse(event['body']) : {}
