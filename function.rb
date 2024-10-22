@@ -26,6 +26,8 @@ def main(event:, context:)
       return response(status: 405)
     end
   end
+else
+  return response(status: 404)
 end
 
 
