@@ -8,19 +8,21 @@ def main(event:, context:)
   # You shouldn't need to use context, but its fields are explained here:
   # https://docs.aws.amazon.com/lambda/latest/dg/ruby-context.html
   event["headers"] = event["headers"].transform_keys(&:downcase)
-  
   if event['path'] == '/'
     if event['httpMethod'] == 'GET'
-      token = event["headers"]["authorization"]
-      if token
+      if event["headers"].key?("authorization")
+        token = event["headers"]["authorization"]
         begin
-          token_decoded = JWT.decode token[7..], ENV['JWT_SECRET'], true, { algorithm: 'HS256' }
-          return response(body: token_decoded[0]["data"], status: 200)
-        rescue JWT::ImmatureSignature, JWT::ExpiredSignature
+          decoded_token = JWT.decode token[7, token.length], ENV['JWT_SECRET'], 'HS256'
+          data = decoded_token[0]
+          return response(body: data["data"], status: 200)
+        rescue JWT::ImmatureSignature
+          return response(status: 401)
+        rescue JWT::ExpiredSignature
           return response(status: 401)
         rescue JWT::DecodeError
           return response(status: 403)
-        end
+        end 
       end
       return response(status: 403)
     else
@@ -29,17 +31,11 @@ def main(event:, context:)
   elsif event['path'] == '/token'
     if event['httpMethod'] == 'POST'
       if event["headers"]["content-type"] == "application/json"
-        if event['body'].nil? || event['body'].strip.empty?
-          return response(status: 422, body: { error: 'Empty or missing body' }) # Return 422 if body is empty or nil
-        end
         begin
-          # Handle empty body and ensure it's a valid JSON object
-          parsed_body = event['body'] && !event['body'].empty? ? JSON.parse(event['body']) : {}
-          
           payload = {
-            data: parsed_body,  # Use parsed_body, which can be an empty hash
+            data: JSON.parse(event['body']),
             exp: Time.now.to_i + 5,
-            nbf: Time.now.to_i + 2
+            nbf: Time.now.to_i + 2,
           }
           token = JWT.encode payload, ENV['JWT_SECRET'], 'HS256'
           return response(body: {:token => token}, status: 201)
