@@ -7,7 +7,24 @@ require 'pp'
 def main(event:, context:)
   # You shouldn't need to use context, but its fields are explained here:
   # https://docs.aws.amazon.com/lambda/latest/dg/ruby-context.html
-  response(body: event, status: 200)
+  event["headers"] = event["headers"].transform_keys(&:downcase)
+  if event['path'] == '/'
+    if event['httpMethod'] == 'GET'
+      token = event["headers"]["authorization"]
+      if token
+        begin
+          token_decoded = JWT.decode token[7..], ENV['JWT_SECRET'], true, { algorithm: 'HS256' }
+          return response(body: token_decoded[0]["data"], status: 200)
+        rescue JWT::ImmatureSignature, JWT::ExpiredSignature
+          return response(status: 401)
+        rescue JWT::DecodeError
+          return response(status: 403)
+        end
+      end
+      return response(status: 403)
+    else
+      return response(status: 405)
+    end
 end
 
 def response(body: nil, status: 200)
