@@ -29,8 +29,12 @@ def main(event:, context:)
   elsif event['path'] == '/auth/token'
     if event['httpMethod'] == 'POST'
       if event["headers"]["content-type"] == "application/json"
-        
+        if event['body'].nil? || event['body'].strip.empty?
+          return response(status: 422)
+        end
         begin
+          # Handle empty body and ensure it's a valid JSON object
+          parsed_body = event['body'] && !event['body'].empty? ? JSON.parse(event['body']) : {}
           
           payload = {
             data: parsed_body,  # Use parsed_body, which can be an empty hash
