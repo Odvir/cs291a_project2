@@ -39,7 +39,7 @@ def main(event:, context:)
             nbf: Time.now.to_i + 2
           }
           token = JWT.encode payload, ENV['JWT_SECRET'], 'HS256'
-          return response(body: { token: token }, status: 201)
+          return response(body: {:token => token}, status: 201)
         rescue StandardError => e
           return response(status: 422)
         end
