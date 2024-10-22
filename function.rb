@@ -26,7 +26,7 @@ def main(event:, context:)
     else
       return response(status: 405)
     end
-  if event['path'] == '/token'
+  elsif event['path'] == '/token'
     if event['httpMethod'] == 'POST'
       if event["headers"]["content-type"] == "application/json"
         begin
