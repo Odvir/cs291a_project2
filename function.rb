@@ -30,10 +30,13 @@ def main(event:, context:)
     if event['httpMethod'] == 'POST'
       if event["headers"]["content-type"] == "application/json"
         begin
+          # Handle empty body and ensure it's a valid JSON object
+          parsed_body = event['body'] && !event['body'].empty? ? JSON.parse(event['body']) : {}
+          
           payload = {
-            data: JSON.parse(event['body']),
+            data: parsed_body,  # Use parsed_body, which can be an empty hash
             exp: Time.now.to_i + 5,
-            nbf: Time.now.to_i + 2,
+            nbf: Time.now.to_i + 2
           }
           token = JWT.encode payload, ENV['JWT_SECRET'], 'HS256'
           return response(body: { token: token }, status: 201)
