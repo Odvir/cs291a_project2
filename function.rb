@@ -26,7 +26,7 @@ def main(event:, context:)
     else
       return response(status: 405)
     end
-  elsif event['path'] == '/token'
+  if event['path'] == '/token'
     if event['httpMethod'] == 'POST'
       if event["headers"]["content-type"] == "application/json"
         begin
@@ -40,7 +40,7 @@ def main(event:, context:)
           }
           token = JWT.encode payload, ENV['JWT_SECRET'], 'HS256'
           return response(body: {:token => token}, status: 201)
-        rescue StandardError => e
+        rescue Exception => e
           return response(status: 422)
         end
       else
