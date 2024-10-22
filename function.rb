@@ -31,8 +31,6 @@ def main(event:, context:)
       if event["headers"]["content-type"] == "application/json"
         
         begin
-          # Handle empty body and ensure it's a valid JSON object
-          parsed_body = event['body'] && !event['body'].empty? ? JSON.parse(event['body']) : {}
           
           payload = {
             data: parsed_body,  # Use parsed_body, which can be an empty hash
