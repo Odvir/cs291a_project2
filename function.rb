@@ -47,7 +47,7 @@ def main(event:, context:)
       return response(status: 405)
     end
   else
-    return build_response(status: 404)
+    return response(status: 404)
   end
 end
 
